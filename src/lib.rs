@@ -120,10 +120,12 @@ struct CameraOrientation {
 
 /// Marker component for the primary camera in the scene
 #[derive(Component, Reflect)]
+#[reflect(Component)]
 pub struct MainCamera;
 
 /// Component for the object the camera should follow, with an optional offset
 #[derive(Component, Default, Reflect)]
+#[reflect(Component)]
 pub struct CameraAnchor(pub Option<Vec3>);
 
 fn read_camera_rotation_inputs(
