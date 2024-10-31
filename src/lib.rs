@@ -34,6 +34,8 @@ impl Plugin for VictimlessCameraPlugin {
         app.insert_resource(self.0)
             .insert_resource(MovementCompass::default())
             .add_event::<RotateCameraEvent>()
+            .register_type::<MainCamera>()
+            .register_type::<CameraAnchor>()
             .add_systems(
                 Update,
                 (translate_camera, rotate_camera, read_camera_rotation_inputs),
@@ -117,11 +119,11 @@ struct CameraOrientation {
 }
 
 /// Marker component for the primary camera in the scene
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct MainCamera;
 
 /// Component for the object the camera should follow, with an optional offset
-#[derive(Component, Default)]
+#[derive(Component, Default, Reflect)]
 pub struct CameraAnchor(pub Option<Vec3>);
 
 fn read_camera_rotation_inputs(
