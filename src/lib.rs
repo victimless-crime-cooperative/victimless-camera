@@ -33,12 +33,17 @@ impl Plugin for VictimlessCameraPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(self.0)
             .insert_resource(MovementCompass::default())
-            .add_event::<RotateCameraEvent>()
+            .add_event::<SmoothRotateCameraEvent>()
             .register_type::<MainCamera>()
             .register_type::<CameraAnchor>()
             .add_systems(
                 Update,
-                (translate_camera, rotate_camera, read_camera_rotation_inputs),
+                (
+                    translate_camera,
+                    rotate_camera,
+                    read_smooth_camera_rotation_inputs,
+                    read_absolute_camera_rotation_inputs,
+                ),
             )
             .observe(update_compass);
     }
@@ -110,7 +115,10 @@ impl CameraSettings {
 
 /// Simple event that accepts x any y inputs to rotate the camera
 #[derive(Event)]
-pub struct RotateCameraEvent(pub Vec2);
+pub struct SmoothRotateCameraEvent(pub Vec2);
+
+#[derive(Event)]
+pub struct AbsoluteRotateCameraEvent(pub Vec3);
 
 #[derive(Event)]
 struct CameraOrientation {
@@ -128,10 +136,10 @@ pub struct MainCamera;
 #[reflect(Component)]
 pub struct CameraAnchor(pub Option<Vec3>);
 
-fn read_camera_rotation_inputs(
+fn read_smooth_camera_rotation_inputs(
     mut camera_settings: ResMut<CameraSettings>,
     time: Res<Time>,
-    mut rotate_events: EventReader<RotateCameraEvent>,
+    mut rotate_events: EventReader<SmoothRotateCameraEvent>,
 ) {
     for event in rotate_events.read() {
         let Vec2 { x, y } = event.0;
@@ -146,6 +154,23 @@ fn read_camera_rotation_inputs(
         if y != 0.0 {
             camera_settings
                 .rotate_x(-y * 360.0_f32.to_radians() * time.delta_seconds() * y_sensitivity);
+        }
+    }
+}
+
+fn read_absolute_camera_rotation_inputs(
+    mut camera_settings: ResMut<CameraSettings>,
+    mut rotate_events: EventReader<AbsoluteRotateCameraEvent>,
+) {
+    for event in rotate_events.read() {
+        let Vec3 { x, y, z: _ } = event.0;
+
+        if x != 0.0 {
+            camera_settings.rotate_y(-x);
+        }
+
+        if y != 0.0 {
+            camera_settings.rotate_x(-y);
         }
     }
 }
