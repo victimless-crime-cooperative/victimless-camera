@@ -34,6 +34,7 @@ impl Plugin for VictimlessCameraPlugin {
         app.insert_resource(self.0)
             .insert_resource(MovementCompass::default())
             .add_event::<SmoothRotateCameraEvent>()
+            .add_event::<AbsoluteRotateCameraEvent>()
             .register_type::<MainCamera>()
             .register_type::<CameraAnchor>()
             .add_systems(
