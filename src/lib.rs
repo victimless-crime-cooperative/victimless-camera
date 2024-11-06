@@ -98,7 +98,6 @@ pub struct CameraSettings {
     pub x_sensitivity: f32,
     pub y_sensitivity: f32,
     pub smoothing: f32,
-    pub head_position: Vec3,
     pub x_limits: RotationLimits,
     x_angle: f32,
     y_angle: f32,
