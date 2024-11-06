@@ -135,7 +135,7 @@ pub struct MainCamera;
 /// Component for the object the camera should follow, with an optional offset
 #[derive(Component, Default, Reflect)]
 #[reflect(Component)]
-pub struct CameraAnchor(pub Option<Vec3>);
+pub struct CameraAnchor(pub Vec3);
 
 fn read_smooth_camera_rotation_inputs(
     mut camera_settings: ResMut<CameraSettings>,
@@ -184,21 +184,14 @@ fn translate_camera(
 ) {
     if let Ok(mut camera_transform) = camera_query.get_single_mut() {
         if let Ok((anchor_transform, anchor)) = anchor_query.get_single() {
-            if let Some(offset) = anchor.0 {
-                let desired_rotation = Quat::from_rotation_y(camera_settings.y_angle)
-                    * Quat::from_rotation_x(camera_settings.x_angle);
+            let desired_rotation = Quat::from_rotation_y(camera_settings.y_angle)
+                * Quat::from_rotation_x(camera_settings.x_angle);
 
-                let camera_position = (desired_rotation * offset) + anchor_transform.translation;
-                camera_transform.translation = camera_transform.translation.lerp(
-                    camera_position,
-                    time.delta_seconds() * camera_settings.smoothing,
-                );
-            } else {
-                camera_transform.translation = camera_transform.translation.lerp(
-                    anchor_transform.translation,
-                    time.delta_seconds() * camera_settings.smoothing,
-                );
-            }
+            let camera_position = (desired_rotation * anchor.0) + anchor_transform.translation;
+            camera_transform.translation = camera_transform.translation.lerp(
+                camera_position,
+                time.delta_seconds() * camera_settings.smoothing,
+            );
         }
     }
 }
